@@ -1,10 +1,11 @@
 # Tessera 設計書
 
-> 版: 0.2 — 2026-04-23
+> 版: 0.3 — 2026-04-23
 > 著者: kazmit299
 > ステータス: ドラフト (実装未着手)
 >
 > **変更履歴**
+> - 0.3 (2026-04-23) — §5.3 を全面書き直し: 6 段フォールバック + mesh の peer-relay 特典 + 日本モバイル IPv6 現実 + RFC 4941 取扱
 > - 0.2 (2026-04-23) — §5 に同期戦略 / 権威的決定の節を追加。§12 の mesh lag compensation と host migration を確定に移動
 > - 0.1 (2026-04-23) — 初稿
 
@@ -132,19 +133,47 @@ bincode は使わない (スキーマレスで破壊的変更が起こる)。候
 - 1 人が **host 権** を持つ (deterministic 選出: PeerId 最小)。
 - host が落ちたら次席が即座に引き継ぐ (state は全員が直近 snapshot を保持)。
 
-### 5.3 Relay 経由接続フロー
+### 5.3 接続経路とフォールバック
+
+経路候補を ICE 的に並列試行し、最初に成立したものを採用する。
 
 ```
-C ─── STUN probe ──→  type 判定
-│
-├─ Full cone / restricted → 直接 QUIC (hole punch)
-│
-└─ Symmetric NAT (LTE 典型)
-       └─→ TURN (UDP relay) ─→ Server
-              ↑ Synergos Issue #23 完遂が前提
+1. IPv6 直接         — 両側が inbound 許可された v6 を持つ時のみ成立
+2. IPv4 直接 (STUN)  — 双方が Full cone / Restricted / Port-restricted NAT
+3. Peer-relay        — mesh プロファイル限定。到達可能な第三 peer 経由
+4. TURN UDP          — Synergos #23 完遂が前提
+5. TURN TCP          — UDP 閉塞網・企業 firewall 対策
+6. WS relay          — synergos-relay。最終手段
 ```
 
-フォールバック順: 直接 UDP → TURN UDP → TURN TCP → WS relay (synergos-relay)。
+- Symmetric NAT (モバイル LTE 典型) 同士は 2 が失敗し、3 または 4 に落ちる。
+- **モバイル 2 人対戦** (格闘など) は第三 peer が居ないため 3 が存在せず、4 が実質 mandatory。これが #23 を非交渉的依存として扱う理由。
+- **3 人以上の mesh** で誰か 1 人でも reachable なら、その peer が TURN 代替になり外部依存を減らせる — mesh プロファイルの大きな利点。
+
+#### 5.3.1 IPv6 直接到達性の現実 (日本モバイル、2026-04 時点)
+
+| キャリア | v6 割当 | inbound 許可 | 実用直接 P2P 成功率 |
+|---|---|---|---|
+| docomo (4G/5G) | ほぼ全契約 | 原則 filter | 低 (ほぼ不可) |
+| au / KDDI | 5G 全 / 4G 一部 | 原則 filter | 低 |
+| SoftBank | 5G 中心 | 非一貫 | 低 |
+| 楽天モバイル | native v6 | filter | 低 |
+| 主要 MVNO | v4-only 多数 | — | 不可 |
+
+**結論**:
+
+- v6 割当は進んだが、**inbound はキャリア firewall で概ね遮断**される。mesh VPN (Tailscale 等) 運用データとも整合。
+- Tessera の IPv6 取扱は **「直接 P2P の主経路」ではなく、TURN / relay への outbound を CGNAT44 を経ずに流すための品質向上チャネル**。RTT が 10–30 ms 稼げる可能性があるので並列試行はする。
+- mesh プロファイルで全員モバイルの場合、1 は並列試行するが **成功を前提に設計しない**。テスト時も通らないケースを既定とする。
+
+#### 5.3.2 IPv6 privacy address (RFC 4941) の扱い
+
+モバイル端末は temporary address を ~24 h で回す。長時間セッションは QUIC connection migration (§6.1) で差替えを追従する。端末が RFC 7217 の stable privacy address を優先する設定なら migration 不要。
+
+#### 5.3.3 経路選択の運用ポリシー
+
+- 試行順は並列だが **採用順は `RTT + jitter × 2`** で最小のものを選ぶ。直接経路が通っても jitter が酷いと TURN より UX が悪いことがある。
+- セッション中に上位経路が復活 (例: v6 inbound が突然通った) した場合、**最低 30 s 安定してから** migration。チャタリング防止。
 
 ### 5.4 同期戦略 (プロファイル別)
 
