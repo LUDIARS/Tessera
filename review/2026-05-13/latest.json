@@ -1,0 +1,150 @@
+{
+  "repo": "LUDIARS/Tessera",
+  "path": "E:/Document/Ars/Tessera",
+  "review_date": "2026-05-13",
+  "aiformat_version": 5,
+  "implementation_status": "not_started",
+  "design_version": "0.7",
+  "design_date": "2026-04-23",
+  "tracked_files": [
+    ".gitignore",
+    "README.md",
+    "docs/DESIGN.md"
+  ],
+  "weighted_score": 2.65,
+  "weighted_score_max": 4.0,
+  "weighted_score_grade": "B-",
+  "ratings": {
+    "design": "B+",
+    "vulnerability": "B",
+    "implementation": "N/A",
+    "missing_features": "C",
+    "quality": "A-"
+  },
+  "rating_numeric": {
+    "design": 3.3,
+    "vulnerability": 3.0,
+    "implementation": 1.0,
+    "missing_features": 2.0,
+    "quality": 3.7
+  },
+  "weights": {
+    "design": 0.30,
+    "vulnerability": 0.20,
+    "implementation": 0.20,
+    "missing_features": 0.15,
+    "quality": 0.15
+  },
+  "finding_counts": {
+    "design_improvements": 4,
+    "vulnerability_high": 2,
+    "vulnerability_medium": 4,
+    "vulnerability_low": 3,
+    "implementation_prep_gaps": 6,
+    "missing_features_milestones": 9,
+    "missing_features_gaps": 8,
+    "missing_features_undecided": 5,
+    "quality_improvements": 5,
+    "total_unique_approx": 35
+  },
+  "autofix_count": 0,
+  "autofix_candidates_enumerated": 12,
+  "autofix_applied": [],
+  "top_findings": [
+    {
+      "id": "T-001",
+      "severity": "info",
+      "category": "design",
+      "title": "v0.7 設計書は LUDIARS 上位、 pause で停止中",
+      "ref": "docs/DESIGN.md:1-14"
+    },
+    {
+      "id": "T-002",
+      "severity": "high",
+      "category": "design",
+      "title": "Codex 切り出し決定済だが §5.7 240 行が残置 (v0.8 で要約化必要)",
+      "ref": "docs/DESIGN.md:411-412, 410-650"
+    },
+    {
+      "id": "T-003",
+      "severity": "high",
+      "category": "vulnerability",
+      "title": "invitation token (tessera hospitalis) のライフサイクル未定義",
+      "ref": "docs/DESIGN.md:691"
+    },
+    {
+      "id": "T-004",
+      "severity": "high",
+      "category": "vulnerability",
+      "title": "arbiter 選出 PeerId 最小は Sybil grind 可能",
+      "ref": "docs/DESIGN.md:154,300-301"
+    },
+    {
+      "id": "T-005",
+      "severity": "medium",
+      "category": "missing_features",
+      "title": "§12 未決 12 件、 M0-M5 ブロッカー含む",
+      "ref": "docs/DESIGN.md:751-763"
+    },
+    {
+      "id": "T-006",
+      "severity": "medium",
+      "category": "missing_features",
+      "title": "Lobby/Tessera 境界 (JoinSessionParams) 未仕様化",
+      "ref": "docs/DESIGN.md:402-408"
+    },
+    {
+      "id": "T-007",
+      "severity": "medium",
+      "category": "vulnerability",
+      "title": "T1 split-brain の tie-break 規則欠落",
+      "ref": "docs/DESIGN.md:303-304"
+    },
+    {
+      "id": "T-008",
+      "severity": "medium",
+      "category": "missing_features",
+      "title": "Replay フォーマット未定義 (T1 §5.7.8 で言及のみ)",
+      "ref": "docs/DESIGN.md:597,646"
+    },
+    {
+      "id": "T-009",
+      "severity": "low",
+      "category": "quality",
+      "title": "README が 21 行と最小、 pause 理由と関連リポ案内が不足",
+      "ref": "README.md:22-24"
+    },
+    {
+      "id": "T-010",
+      "severity": "low",
+      "category": "quality",
+      "title": "CLAUDE.md 未整備 (M0 再開時に必要)",
+      "ref": "—"
+    }
+  ],
+  "review_files": [
+    "REVIEW.md",
+    "REVIEW_DESIGN.md",
+    "REVIEW_VULNERABILITY.md",
+    "REVIEW_IMPLEMENTATION.md",
+    "REVIEW_MISSING_FEATURES.md",
+    "REVIEW_QUALITY.md",
+    "AUTOFIX.md",
+    "latest.json"
+  ],
+  "review_total_chars_approx": 3300,
+  "review_total_chars_target": "2000-4000",
+  "code_modifications_made": false,
+  "tools_used": [
+    "git ls-files",
+    "git log --oneline -50",
+    "Read README.md",
+    "Read docs/DESIGN.md",
+    "Read .gitignore"
+  ],
+  "notes": [
+    "実装未着手のため Implementation は N/A (重み計算で 1.0 換算)",
+    "Codex は LUDIARS/Codex 別リポへ移行中。 §5.7 評価は移行前提",
+    "Tessera は Synergos #23 (TURN) 完遂待ちで v0.7 pause"
+  ]
+}
